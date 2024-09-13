@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.ResourceBundle;
 
 import application.Main;
+import gui.listeners.DataChangeListeners;
 import gui.util.Alerts;
 import gui.util.Utils;
 import javafx.collections.FXCollections;
@@ -26,7 +27,7 @@ import javafx.stage.Stage;
 import model.entities.Department;
 import model.services.DepartmentService;
 
-public class DepartmentListController implements Initializable{
+public class DepartmentListController implements Initializable, DataChangeListeners{
 	
 	private DepartmentService service;
 
@@ -40,6 +41,11 @@ public class DepartmentListController implements Initializable{
 	private Button buttonNew;
 	
 	private ObservableList<Department> obsList;
+	
+	public void onDataChanged() {
+		
+		updateTableView();
+	}
 	
 	@Override
 	public void initialize(URL url, ResourceBundle rb) {
@@ -94,6 +100,7 @@ public class DepartmentListController implements Initializable{
 			controller.setDepartmentService(new DepartmentService());
 			controller.setDepartment(obj);
 			controller.updateFormData(obj);//carregar o obj no formulário
+			controller.subscribeDataChangeListener(this);//mando a propria classe (DepartmentListController)
 			
 			Stage dialogStage = new Stage();
 			dialogStage.setTitle("Enter Department Data");

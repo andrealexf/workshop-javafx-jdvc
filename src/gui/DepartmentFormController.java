@@ -1,9 +1,12 @@
 package gui;
 
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.ResourceBundle;
 
 import db.DbException;
+import gui.listeners.DataChangeListeners;
 import gui.util.Alerts;
 import gui.util.Constraints;
 import gui.util.Utils;
@@ -34,6 +37,13 @@ public class DepartmentFormController implements Initializable {
 	@FXML
 	private Button buttonCancel;
 
+	private List<DataChangeListeners> dataChangeListeners = new ArrayList<>();
+	
+	public void subscribeDataChangeListener(DataChangeListeners listener) {
+		
+		dataChangeListeners.add(listener);
+	}
+
 	@FXML
 	public void onButtonSaveAction(ActionEvent event) {
 
@@ -51,11 +61,21 @@ public class DepartmentFormController implements Initializable {
 			
 			entity = getFormData();// esse metodo pega o texto e o id inserido e coloca num obj department que vira o entity
 			service.saveOrUpdate(entity);
+			notifyDataChangeListeners();
 			Utils.currentStage(event).close();
 			
 		} catch (DbException e) {
 			
 			Alerts.showAlert("Error saving object", null, e.getMessage(), AlertType.ERROR);
+		}
+	}
+
+	private void notifyDataChangeListeners() {
+
+		for (DataChangeListeners listerner : dataChangeListeners) {
+			
+			listerner.onDataChanged();//executa o metodo em cada listerner
+			//emite o evento para a outra classe (departmentListController) e esta executa o updateView
 		}
 	}
 
