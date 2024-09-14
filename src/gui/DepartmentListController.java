@@ -9,6 +9,7 @@ import application.Main;
 import gui.listeners.DataChangeListeners;
 import gui.util.Alerts;
 import gui.util.Utils;
+import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -18,6 +19,7 @@ import javafx.fxml.Initializable;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
+import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
@@ -34,13 +36,35 @@ public class DepartmentListController implements Initializable, DataChangeListen
 	@FXML
 	private TableView<Department> tableViewDepartment;
 	@FXML
-	private TableColumn<Department, Integer> tableCollumnId;
+	private TableColumn<Department, Integer> tableColumnId;
 	@FXML
-	private TableColumn<Department, String> tableCollumnName;
+	private TableColumn<Department, String> tableColumnName;
+	@FXML
+	private TableColumn<Department, Department> tableColumnEdit;
 	@FXML
 	private Button buttonNew;
 	
 	private ObservableList<Department> obsList;
+	
+	private void initEditButtons() {
+		
+		tableColumnEdit.setCellValueFactory(param -> new ReadOnlyObjectWrapper<>(param.getValue()));
+		tableColumnEdit.setCellFactory(param -> new TableCell<Department, Department>() {
+			private final Button button = new Button("edit");
+
+			@Override
+			protected void updateItem(Department obj, boolean empty) {
+				super.updateItem(obj, empty);
+				if (obj == null) {
+					setGraphic(null);
+					return;
+				}
+				setGraphic(button);
+				button.setOnAction(
+						event -> createDialogForm(obj, "/gui/DepartmentForm.fxml", Utils.currentStage(event)));
+			}
+		});
+	}
 	
 	public void onDataChanged() {
 		
@@ -60,8 +84,8 @@ public class DepartmentListController implements Initializable, DataChangeListen
 
 	private void initializeNodes() {
 
-		tableCollumnId.setCellValueFactory(new PropertyValueFactory<>("id"));//iniciar o comportamento das colunas
-		tableCollumnName.setCellValueFactory(new PropertyValueFactory<>("name"));
+		tableColumnId.setCellValueFactory(new PropertyValueFactory<>("id"));//iniciar o comportamento das colunas
+		tableColumnName.setCellValueFactory(new PropertyValueFactory<>("name"));
 		
 		Stage stage = (Stage) Main.getMainScene().getWindow();
 		tableViewDepartment.prefHeightProperty().bind(stage.heightProperty());//tableView acompanhar a altura da janela
@@ -87,6 +111,7 @@ public class DepartmentListController implements Initializable, DataChangeListen
 		List<Department> list = service.findAll();
 		obsList = FXCollections.observableArrayList(list);//instância o obsList pegando os dados da list de cima 
 		tableViewDepartment.setItems(obsList);
+		initEditButtons();
 	}
 	
 	private void createDialogForm(Department obj, String absoluteName, Stage parentStage) {
