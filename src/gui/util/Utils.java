@@ -100,4 +100,15 @@ public class Utils {
 		});
 	}
 
+	public static Double tryParseToDouble(String id) {
+
+		try {
+
+			return Double.parseDouble(id);
+
+		} catch (NumberFormatException e) {
+
+			return null;
+		}
+	}
 }
